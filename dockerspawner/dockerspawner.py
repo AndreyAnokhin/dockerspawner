@@ -905,7 +905,16 @@ class DockerSpawner(Spawner):
     def _get_ssl_alt_names(self):
         return ['DNS:' + self.internal_hostname]
 
-    mem_limit_users = Dict(config=True)
+    mem_limit_users = Dict(
+        config=True,
+        help=dedent(
+            """
+            Custom memory limits for users
+            
+            Set dictionary {"username": memory_limit}
+            """
+        )
+    )
 
     @gen.coroutine
     def create_object(self):
@@ -934,9 +943,9 @@ class DockerSpawner(Spawner):
             host_config["mem_limit"] = self.mem_limit
 
         if self.mem_limit_users:
+            # Custom memory limit for user in mem_limit_users dictionary
             if self.user.name in self.mem_limit_users:
-                self.mem_limit = self.mem_limit_users[self.user.name]
-        host_config["mem_limit"] = self.mem_limit
+                host_config["mem_limit"] = self.mem_limit_users[self.user.name]
 
         if not self.use_internal_ip:
             host_config["port_bindings"] = {self.port: (self.host_ip,)}
