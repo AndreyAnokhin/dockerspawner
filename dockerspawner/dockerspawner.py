@@ -905,7 +905,7 @@ class DockerSpawner(Spawner):
     def _get_ssl_alt_names(self):
         return ['DNS:' + self.internal_hostname]
 
-    mem_limit_users = Dict()
+    mem_limit_users = Dict(config=True)
 
     @gen.coroutine
     def create_object(self):
@@ -931,11 +931,12 @@ class DockerSpawner(Spawner):
             # If jupyterhub version > 0.7, mem_limit is a traitlet that can
             # be directly configured. If so, use it to set mem_limit.
             # this will still be overriden by extra_host_config
-
-            if self.mem_limit_users:
-                if self.user.name in self.mem_limit_users:
-                    self.mem_limit = self.mem_limit_users[self.user.name]
             host_config["mem_limit"] = self.mem_limit
+
+        if self.mem_limit_users:
+            if self.user.name in self.mem_limit_users:
+                self.mem_limit = self.mem_limit_users[self.user.name]
+        host_config["mem_limit"] = self.mem_limit
 
         if not self.use_internal_ip:
             host_config["port_bindings"] = {self.port: (self.host_ip,)}
