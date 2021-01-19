@@ -24,6 +24,7 @@ from traitlets import (
     CaselessStrEnum,
     Dict,
     List,
+    Set,
     Int,
     Unicode,
     Union,
@@ -452,6 +453,19 @@ class DockerSpawner(Spawner):
         as other volume names.
         """
     )
+
+    # admin_users = Set(
+    #     config=True
+    # )
+    # shared_volumes = Dict(
+    #     config=True
+    # )
+    def set_shared_volumes(self, admin_users, shared_volumes):
+        for volume_name in shared_volumes:
+            if self.user.name in admin_users:
+                self.volumes[volume_name] = shared_volumes[volume_name]
+            else:
+                self.volumes[volume_name] = {"bind": shared_volumes[volume_name], "mode": "ro"}
 
     read_only_volumes = Dict(
         config=True,
