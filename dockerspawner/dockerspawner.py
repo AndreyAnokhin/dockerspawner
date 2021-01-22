@@ -454,18 +454,19 @@ class DockerSpawner(Spawner):
         """
     )
 
-    # admin_users = Set(
-    #     config=True
-    # )
-    # shared_volumes = Dict(
-    #     config=True
-    # )
-    def set_shared_volumes(self, admin_users, shared_volumes):
-        for volume_name in shared_volumes:
-            if self.user.name in admin_users:
-                self.volumes[volume_name] = shared_volumes[volume_name]
+    admin_users = Set(
+        config=True
+    )
+    shared_volumes = Dict(
+        config=True
+    )
+
+    def _set_shared_volumes(self):
+        for volume_name in self.shared_volumes:
+            if self.user.name in self.admin_users:
+                self.volumes[volume_name] = self.shared_volumes[volume_name]
             else:
-                self.volumes[volume_name] = {"bind": shared_volumes[volume_name], "mode": "ro"}
+                self.volumes[volume_name] = {"bind": self.shared_volumes[volume_name], "mode": "ro"}
 
     read_only_volumes = Dict(
         config=True,
@@ -715,6 +716,7 @@ class DockerSpawner(Spawner):
 
         Mode may be 'ro', 'rw', 'z', or 'Z'.
         """
+        self._set_shared_volumes()
         binds = self._volumes_to_binds(self.volumes, {})
         read_only_volumes = {}
         # FIXME: replace getattr with self.internal_ssl
