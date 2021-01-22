@@ -467,7 +467,7 @@ class DockerSpawner(Spawner):
                 self.volumes[volume_name] = self.shared_volumes[volume_name]
             else:
                 self.volumes[volume_name] = {"bind": self.shared_volumes[volume_name], "mode": "ro"}
-
+        return self.volumes
     read_only_volumes = Dict(
         config=True,
         help=dedent(
@@ -716,7 +716,7 @@ class DockerSpawner(Spawner):
 
         Mode may be 'ro', 'rw', 'z', or 'Z'.
         """
-        self._set_shared_volumes()
+        self.volumes = self._set_shared_volumes()
         binds = self._volumes_to_binds(self.volumes, {})
         read_only_volumes = {}
         # FIXME: replace getattr with self.internal_ssl
